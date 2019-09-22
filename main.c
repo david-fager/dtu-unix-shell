@@ -6,7 +6,8 @@
 #include <sys/wait.h>
 
 char **tokenizeArguments(char *line);
-int delegater(char **arguments);
+int simpleCommands(char **arguments);
+int executer(char **arguments);
 
 int main(int argc, char *argv[]) {
 
@@ -27,7 +28,7 @@ int main(int argc, char *argv[]) {
 
         // Splits user input and handles it
         arguments = tokenizeArguments(line);
-        status = delegater(arguments);
+        status = simpleCommands(arguments);
 
         // Frees allocated memory
         free(line);
@@ -56,30 +57,29 @@ char **tokenizeArguments(char *line) {
     return splits;
 }
 
-// Delegates which method to run based on the user's entered arguments
-int delegater(char **arguments) {
+// These commands are for the parent shell,
+int simpleCommands(char **arguments) {
     if (arguments[0] != NULL) {
         if (!strcmp(arguments[0],"help")) {
             // User wants help
-
+            printf("FS supports the following commands:\n\n"
+                   "> help\n"
+                   "> cd [path]\n"
+                   "> exit");
         } else if(!strcmp(arguments[0],"cd")) {
             // User wants to change directory
 
         } else if(!strcmp(arguments[0],"exit")) {
-            exit(0); // User wants to exit
+            return 0; // User wants to exit
+        } else {
+            printf("Unknown command, type 'help' for a list of supported commands.\n");
         }
     } else {
-        return 1; // Nothing was given as argument
+        return 1; // No argument given
     }
-    // If the given argument is not supported
-    printf("Unknown command, write 'help' for a list of commands.\n");
-    return 1;
+    return executer(arguments); //
 }
 
-int command_help(char **arguments) {
-
-}
-
-int command_cd(char **arguments) {
+int executer(char **arguments) {
 
 }

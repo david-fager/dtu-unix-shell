@@ -19,7 +19,8 @@ int main(int argc, char *argv[]) {
            "Shell started.\n"
            "--------------\n");
 
-    do {
+    // Main loop
+    while (status) {
         // Awaits user input
         printf("FS > ");
         getline(&line, &bufsize, stdin);
@@ -31,30 +32,31 @@ int main(int argc, char *argv[]) {
         // Frees allocated memory
         free(line);
         free(arguments);
-    } while (status);
+    }
 
     return 0;
 }
 
+// Splits the line's arguments and saves each word (argument)
 char **tokenizeArguments(char *line) {
 
     char *temp;
     char **splits = malloc(sizeof(char*));
-    if (splits == NULL) {
-        printf("Memory allocation failed, exiting program.\n");
-        exit(EXIT_FAILURE);
-    }
-
     int index = 0;
+
+    // Tokenize line and point to first token (argument)
     temp = strtok(line, " \n\r\t\a");
+
+    // Loop through tokens and create pointers in 'split' array to each token
     while (temp != NULL) {
         splits[index++] = temp;
-        temp = strtok(NULL, " \n\r\t\a");
+        temp = strtok(NULL, " \n\r\t\a"); // Makes pointer point to next token
     }
 
     return splits;
 }
 
+// Delegates which method to run based on the user's entered arguments
 int delegater(char **arguments) {
     if (arguments[0] != NULL) {
         if (!strcmp(arguments[0],"help")) {
@@ -64,7 +66,7 @@ int delegater(char **arguments) {
             // User wants to change directory
 
         } else if(!strcmp(arguments[0],"exit")) {
-            return 0; // User wants to exit
+            exit(0); // User wants to exit
         }
     } else {
         return 1; // Nothing was given as argument
@@ -74,10 +76,10 @@ int delegater(char **arguments) {
     return 1;
 }
 
-int command_help() {
+int command_help(char **arguments) {
 
 }
 
-int command_cd() {
+int command_cd(char **arguments) {
 
 }

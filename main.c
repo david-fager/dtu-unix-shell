@@ -30,6 +30,10 @@ int main(int argc, char *argv[]) {
         arguments = tokenizeArguments(line);
         status = simpleCommands(arguments);
 
+        for(int i = 0; i < sizeof(arguments); i++) {
+            printf("%s\n",arguments[i]);
+        }
+
         // Frees allocated memory
         free(line);
         free(arguments);
@@ -53,7 +57,7 @@ char **tokenizeArguments(char *line) {
         splits[index++] = temp;
         temp = strtok(NULL, " \n\r\t\a"); // Makes pointer point to next token
     }
-
+    splits[index] = NULL;
     return splits;
 }
 
@@ -62,17 +66,33 @@ int simpleCommands(char **arguments) {
     if (arguments[0] != NULL) {
         if (!strcmp(arguments[0],"help")) {
             // User wants help
-            printf("FS supports the following commands:\n\n"
+
+            // If the user wrote more than 'help'
+            if (arguments[1] != NULL) {
+                printf("FS does not support specifics on help.\n\n");
+            }
+
+            // Supported commands
+            printf("FS supports the following commands:\n"
                    "> help\n"
                    "> cd [path]\n"
-                   "> exit");
+                   "> exit\n\n");
+
         } else if(!strcmp(arguments[0],"cd")) {
             // User wants to change directory
+            if (arguments[1] != NULL) {
+                if (chdir(arguments[1]) != 0) {
+                    printf("Unable to locate path.\n");
+                }
+            } else {
+                printf("No path given. Write a path after command 'cd' to change directory.");
+            }
 
         } else if(!strcmp(arguments[0],"exit")) {
             return 0; // User wants to exit
         } else {
             printf("Unknown command, type 'help' for a list of supported commands.\n");
+            return 1;
         }
     } else {
         return 1; // No argument given

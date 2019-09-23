@@ -4,41 +4,50 @@
 #include <math.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <limits.h>
 
 char **tokenizeArguments(char *line);
-int simpleCommands(char **arguments);
+int commandHandler(char **arguments);
+int showHelp(char **arguments);
+int changeDirectory(char **arguments);
 int executer(char **arguments);
 
 int main(int argc, char *argv[]) {
 
+    char cwd[PATH_MAX];
     int status = 1;
     char **arguments = NULL;
     char *line = NULL;
     size_t bufsize = 0;
 
+    // Startup text
     printf("--------------\n"
            "Shell started.\n"
            "--------------\n");
 
+    // Set the beginning path for the shell to the HOME directory
+    chdir(getenv("HOME"));
+
     // Main loop
     while (status) {
-        // Awaits user input
-        printf("FS > ");
+        // Prints current directory
+        getcwd(cwd, sizeof(cwd));
+
+        // Awaits user input (double backslash is coloring of the text)
+        printf("\033[0;31m"
+               "\n%s\n"
+               "\033[0m"
+               "FS > ", cwd);
         getline(&line, &bufsize, stdin);
 
         // Splits user input and handles it
         arguments = tokenizeArguments(line);
-        status = simpleCommands(arguments);
-
-        for(int i = 0; i < sizeof(arguments); i++) {
-            printf("%s\n",arguments[i]);
-        }
-
-        // Frees allocated memory
-        free(line);
-        free(arguments);
+        status = commandHandler(arguments);
     }
 
+    // Frees allocated memory
+    free(arguments);
+    free(line);
     return 0;
 }
 
@@ -46,7 +55,7 @@ int main(int argc, char *argv[]) {
 char **tokenizeArguments(char *line) {
 
     char *temp;
-    char **splits = malloc(sizeof(char*));
+    char **splits = malloc(sizeof(char *));
     int index = 0;
 
     // Tokenize line and point to first token (argument)
@@ -62,44 +71,55 @@ char **tokenizeArguments(char *line) {
 }
 
 // These commands are for the parent shell,
-int simpleCommands(char **arguments) {
-    if (arguments[0] != NULL) {
-        if (!strcmp(arguments[0],"help")) {
-            // User wants help
-
-            // If the user wrote more than 'help'
-            if (arguments[1] != NULL) {
-                printf("FS does not support specifics on help.\n\n");
-            }
-
-            // Supported commands
-            printf("FS supports the following commands:\n"
-                   "> help\n"
-                   "> cd [path]\n"
-                   "> exit\n\n");
-
-        } else if(!strcmp(arguments[0],"cd")) {
-            // User wants to change directory
-            if (arguments[1] != NULL) {
-                if (chdir(arguments[1]) != 0) {
-                    printf("Unable to locate path.\n");
-                }
-            } else {
-                printf("No path given. Write a path after command 'cd' to change directory.");
-            }
-
-        } else if(!strcmp(arguments[0],"exit")) {
-            return 0; // User wants to exit
-        } else {
-            printf("Unknown command, type 'help' for a list of supported commands.\n");
-            return 1;
-        }
-    } else {
+int commandHandler(char **arguments) {
+    if (arguments[0] == NULL) {
         return 1; // No argument given
+    } else if (!strcmp(arguments[0], "help")) {
+        return showHelp(arguments);
+    } else if (!strcmp(arguments[0], "cd")) {
+        return changeDirectory(arguments);
+    } else if (!strcmp(arguments[0], "exit")) {
+        return 0; // User wants to exit
     }
-    return executer(arguments); //
+    return executer(arguments);
 }
 
-int executer(char **arguments) {
+// For when the user wants help
+int showHelp(char **arguments) {
+    if (arguments[1] != NULL) {
+        printf("Too many arguments.\n"); // If the user wrote more than 'help'
+    } else {
+        // Supported commands
+        printf("FS supports the following commands:\n"
+               "> help | shows a list of commands\n"
+               "> cd [path] | changes directory\n"
+               "> exit | stops the program\n\n");
+    }
+    return 1;
+}
 
+// For when the user wants to change directory
+int changeDirectory(char **arguments) {
+    if (arguments[1] != NULL && arguments[2] == NULL) {
+        if (chdir(arguments[1]) != 0) {
+            printf("Unable to locate path.\n");
+        }
+    } else {
+        printf("Path missing. Command help: 'cd [path]'\n");
+    }
+    return 1;
+}
+
+// Executes system calls
+int executer(char **arguments) {
+    int status, pid;
+    pid = fork();
+    if (pid != 0) {
+        // Parent waits for child to exit
+        waitpid(-1, &status, 0); // (-1 = wait for any child, child exit status, options)
+    } else {
+        // executes child process
+        execvp(arguments[0], arguments); // (filename to be executed, user's arguments)
+    }
+    return 1;
 }

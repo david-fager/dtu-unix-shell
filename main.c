@@ -34,10 +34,11 @@ int main(int argc, char *argv[]) {
         getcwd(cwd, sizeof(cwd));
 
         // Awaits user input (double backslash is coloring of the text)
-        printf("\033[0;31m"
+        printf("\033[1;34m"
                "\n%s\n"
-               "\033[0m"
-               "FS > ", cwd);
+               "\033[1;31m"
+               "FS > "
+               "\033[0m", cwd);
         getline(&line, &bufsize, stdin);
 
         // Splits user input and handles it

@@ -7,9 +7,13 @@
 #include <limits.h>
 
 char **tokenizeArguments(char *line);
+
 int commandHandler(char **arguments);
+
 int showHelp(char **arguments);
+
 int changeDirectory(char **arguments);
+
 int executer(char **arguments);
 
 int main(int argc, char *argv[]) {
@@ -56,7 +60,7 @@ int main(int argc, char *argv[]) {
 char **tokenizeArguments(char *line) {
 
     char *temp;
-    char **splits = malloc(sizeof(char *));
+    char **splits = malloc(64 * sizeof(char *));
     int index = 0;
 
     // Tokenize line and point to first token (argument)
@@ -82,6 +86,34 @@ int commandHandler(char **arguments) {
     } else if (!strcmp(arguments[0], "exit")) {
         return 0; // User wants to exit
     }
+
+    // Searching for a pipe
+    char **argsLeft = malloc(64 * sizeof(arguments));
+    char **argsRight = malloc(64 * sizeof(arguments));
+    int pipePlacement = 0;
+    for (int m = 0; m < sizeof(arguments); m++) {
+        if (!strcmp(arguments[m], "|")) {
+            pipePlacement = m;
+            break;
+        }
+    }
+
+    // Splits arguments around the pipe ( argsLeft | argsRight)
+    if (pipePlacement) {
+        for (int i = 0; i < pipePlacement; i++) {
+            argsLeft[i] = arguments[i];
+        }
+        int index = 0;
+        for (int j = pipePlacement + 1; j < sizeof(arguments); j++) {
+            if (arguments[j] != NULL) {
+                argsRight[index++] = arguments[j];
+            } else {
+                break;
+            }
+        }
+        return 1;
+    }
+
     return executer(arguments);
 }
 
@@ -94,7 +126,8 @@ int showHelp(char **arguments) {
         printf("FS supports the following commands:\n"
                "> help | shows a list of commands\n"
                "> cd [path] | changes directory\n"
-               "> exit | stops the program\n\n");
+               "> exit | stops the program\n"
+               "> [system calls] | forks and executes entered system call (ls, cat, cp, etc.)\n\n");
     }
     return 1;
 }
@@ -119,8 +152,9 @@ int executer(char **arguments) {
         // Parent waits for child to exit
         waitpid(-1, &status, 0); // (-1 = wait for any child, child exit status, options)
     } else {
-        // executes child process
+        // Executes child process
         execvp(arguments[0], arguments); // (filename to be executed, user's arguments)
     }
     return 1;
 }
+

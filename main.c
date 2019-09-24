@@ -7,14 +7,11 @@
 #include <limits.h>
 
 char **tokenizeArguments(char *line);
-
 int commandHandler(char **arguments);
-
 int showHelp(char **arguments);
-
 int changeDirectory(char **arguments);
-
 int executer(char **arguments);
+int pipeHandler(char **argsLeft, char **argsRight);
 
 int main(int argc, char *argv[]) {
 
@@ -92,6 +89,9 @@ int commandHandler(char **arguments) {
     char **argsRight = malloc(64 * sizeof(arguments));
     int pipePlacement = 0;
     for (int m = 0; m < sizeof(arguments); m++) {
+        if (arguments[m] == NULL) {
+            break;
+        }
         if (!strcmp(arguments[m], "|")) {
             pipePlacement = m;
             break;
@@ -111,7 +111,7 @@ int commandHandler(char **arguments) {
                 break;
             }
         }
-        return 1;
+        return pipeHandler(argsLeft, argsRight);
     }
 
     return executer(arguments);
@@ -150,7 +150,7 @@ int executer(char **arguments) {
     pid = fork();
     if (pid != 0) {
         // Parent waits for child to exit
-        waitpid(-1, &status, 0); // (-1 = wait for any child, child exit status, options)
+        waitpid(pid, &status, 0); // (-1 = wait for any child, child exit status, options)
     } else {
         // Executes child process
         execvp(arguments[0], arguments); // (filename to be executed, user's arguments)
@@ -158,3 +158,33 @@ int executer(char **arguments) {
     return 1;
 }
 
+int pipeHandler(char **argsLeft, char **argsRight) {
+
+    int fds[2];
+    pid_t pid1, pid2;
+    int status;
+
+    pid1 = fork();
+    if (pid1 > 0) {
+        // Parent parent wait for execution
+        waitpid(pid1, &status, 0);
+    } else if (pid1 == 0) {
+        // 1. child
+        pipe(fds);
+        pid2 = fork();
+
+        if (pid2 > 0) {
+            // 1. child now parent
+            dup2(fds[0],0);
+            close(fds[1]);
+            execvp(argsRight[0], argsRight);
+        } else if (pid2 == 0) {
+            // 1. child's child
+            dup2(fds[1],1);
+            close(fds[0]);
+            execvp(argsLeft[0], argsLeft);
+        }
+    }
+
+    return 1;
+}

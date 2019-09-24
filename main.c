@@ -85,8 +85,6 @@ int commandHandler(char **arguments) {
     }
 
     // Searching for a pipe
-    char **argsLeft = malloc(64 * sizeof(arguments));
-    char **argsRight = malloc(64 * sizeof(arguments));
     int pipePlacement = 0;
     for (int m = 0; m < sizeof(arguments); m++) {
         if (arguments[m] == NULL) {
@@ -100,6 +98,9 @@ int commandHandler(char **arguments) {
 
     // Splits arguments around the pipe ( argsLeft | argsRight)
     if (pipePlacement) {
+        char **argsLeft = malloc(64 * sizeof(arguments));
+        char **argsRight = malloc(64 * sizeof(arguments));
+
         for (int i = 0; i < pipePlacement; i++) {
             argsLeft[i] = arguments[i];
         }

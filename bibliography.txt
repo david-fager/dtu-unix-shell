@@ -1,0 +1,20 @@
+> Danmarks Tekniske Universitet
+> Operativsystemer
+> Mandatory assignment 1
+> David Fager
+> s185120
+
+This text file contains a bibliography of the used sources in the 
+making of the Operating Systems course's mandatory 1 assignment.
+
+Assignment:
+https://cn.inside.dtu.dk/cnnet/filesharing/download/9e9c16bb-1776-4958-9f86-978fc7b590d0
+https://cn.inside.dtu.dk/cnnet/filesharing/download/5a1bac86-c0f4-4722-bd8e-47a94549fffe
+
+Bibliography:
+a) Reading material from the course on system calls: https://cn.inside.dtu.dk/cnnet/filesharing/download/33ad1b5d-1c90-48a9-9630-0d22d43abfdf
+
+b) brennan.io, 'write a shell in c', used 24/09/2019: https://brennan.io/2015/01/16/write-a-shell-in-c/
+c) www.geeksforgeeks.org, 'making linux shell c', used 24/09/2019: https://www.geeksforgeeks.org/making-linux-shell-c/
+d) stackoverflow.com, 'chdir to home directory', used 24/09/2019: https://stackoverflow.com/questions/9493234/chdir-to-home-directory
+e) www.theurbanpenguin.com, 'adding color to your output from c', used 24/09/2019: http://web.theurbanpenguin.com/adding-color-to-your-output-from-c/

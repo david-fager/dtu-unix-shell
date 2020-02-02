@@ -126,9 +126,9 @@ int showHelp(char **arguments) {
         // Supported commands
         printf("FS supports the following commands:\n"
                "> help | shows a list of commands\n"
-               "> cd [path] | changes directory\n"
+               "> cd path | changes directory\n"
                "> exit | stops the program\n"
-               "> [system calls] | forks and executes entered system call (ls, cat, cp, etc.)\n\n");
+               "> [system command(s)] | commands for unix systems (ls, cat, cp, etc.)\n\n");
     }
     return 1;
 }
